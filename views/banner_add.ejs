@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/ionicons.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/admin-lte/dist/css/AdminLTE.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/admin-lte/dist/css/skins/skin-blue.min.css"/>
+    <style>
+      .prviewImg{list-style: none}
+      .prviewImg li {
+        display: inline-block;
+        position: relative;
+        width: 100px;
+        height: 50px;
+        overflow: hidden;
+      }
+      .prviewImg li img{
+        position: absolute;
+        width:100%;
+        height: auto;
+      }
+      .prviewImg li .tip{
+        position: absolute;
+        width: 100%;
+        height:100%;
+        background-color: rgba(0,0,0,0.5);
+        font-size: 32px;
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+        line-height: 50px;
+        display: none;
+      }
+      .uploadImg{
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+  <!-- Main Header -->
+      <% include header.ejs %>
+
+  <!-- Left side column. contains the logo and sidebar -->
+      <% include menu.ejs %>
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- Your Page Content Here -->
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">添加轮播图</h3>
+        </div>
+        <!-- /.box-header -->
+        <!-- form start -->
+        <form class="form-horizontal" action="/banner/addBannerAction" method="post">
+          <div class="box-body">
+            <div class="form-group">
+              <label for="id" class="col-sm-2 control-label">轮播图标识id</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" readonly value="<%= bannerID %>" required name="id" id="id" placeholder="轮播图标识id">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="title" class="col-sm-2 control-label">图片地址</label>
+              <div class="col-sm-10">
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">图库选择</button>
+                <input type="text" class="form-control" value="<%= imgUrl %>" required name="title" id="title" placeholder="图片地址">
+
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="title" class="col-sm-2 control-label">预览图片</label>
+              <div class="col-sm-10">
+                <img src="<%= imgUrl %>" id="prviewImg" style="height: 100px;"/>
+              </div>
+            </div>
+            <!--<div class="form-group">
+              <label for="link" class="col-sm-2 control-label">链接地址</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" value="<%= imgUrl %>" required name="link" id="link" placeholder="链接地址">
+              </div>
+            </div>-->
+
+          </div>
+          <!-- /.box-body -->
+          <div class="box-footer">
+            <div class="form-group">
+              <label for="introduction" class="col-sm-2 control-label sr-only">简介</label>
+              <div class="col-sm-10 ">
+                <button type="submit" class="btn btn-info ">添加</button>
+              </div>
+            </div>
+
+          </div>
+          <!-- /.box-footer -->
+        </form>
+      </div>
+      </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+      <!-------------模态窗--------------->
+      <div class="modal " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">选择banner图，只选一张
+                <button class="btn btn-xs btn-success" onclick="uploadimg()">本地上传</button>
+              </h4>
+              <hr/>
+              <form class="uploadImg" action="/banner/uploadBanner" method="post" enctype="multipart/form-data">
+                <input type="text" class="form-control" name="bid" style="display: none"  value="<%= bannerID %>" />
+                <input type="file" required accept="image/*" name="bannerimg" id="bannerimg" />
+                <input type="submit" class="btn btn-xs btn-primary" value="提交"/>
+              </form>
+            </div>
+            <div class="modal-body">
+              <ul class="prviewImg">
+                <% for(var i = 0; i < result.length; i++) {%>
+                <li onclick="changePic('<%= JSON.stringify(result) %>',<%= i %>)">
+                  <img src="<%= result[i].img %>" alt=""  >
+                  <div class="tip" id="tip<%= i %>">√</div>
+                </li>
+                <% } %>
+              </ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" onclick="setPicSrc()">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  <!-- Main Footer -->
+  <% include footer.ejs %>
+</div>
+
+  </body>
+  <script src="/javascripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/bootstrap/dist/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/javascripts/app.min.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function deleteMovie(id){
+    console.log(id)
+      window.location.href = "/movielist/deleteMovie?id="+id;
+  }
+
+  function addMovie(){
+      window.location.href = "/movielist/addMovie";
+  }
+
+  var str = "";
+  function changePic(data, index){
+      var obj = JSON.parse(data);
+      str = obj[index].img
+      $(".tip").hide()
+     $("#tip"+index).show()
+
+  }
+
+  function setPicSrc(){
+    if(str != ""){
+        $("#title").val(str)
+        $("#prviewImg").attr("src", str);
+        $('#myModal').modal('hide')
+    }else{
+        alert("请选择图片")
+    }
+  }
+
+  function uploadimg(){
+      $(".uploadImg").toggle()
+  }
+</script>
+</html>

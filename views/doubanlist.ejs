@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>豆瓣</title>
+    <link rel="stylesheet" type="text/css" href="/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/ionicons.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/admin-lte/dist/css/AdminLTE.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/admin-lte/dist/css/skins/skin-blue.min.css"/>
+    <style>
+      .active{
+        background-color: #f66;
+        color:#fff;
+      }
+        input[type="number"]{
+            width: 80px;
+            font-size: 12px;
+        }
+    </style>
+  </head>
+  <body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+  <!-- Main Header -->
+      <% include header.ejs %>
+
+  <!-- Left side column. contains the logo and sidebar -->
+      <% include menu.ejs %>
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- Your Page Content Here -->
+      <div class="box">
+        <div class="box-header">
+          <h3 class="box-title">
+              <% if( rule == 0) {%>
+            <button class="btn btn-sm btn-success" onclick="addMovie(<%= result.length %>)">添加电影</button>
+            <% } %>
+            共<%= len %>条
+            <a class="btn btn-xs <%= pageCode == 0 ? 'btn-primary' : 'btn-default'%>" href="/doubanlist/paging?pageCode=0&limitNum=5">首页</a>
+            <% for(var i = 0; i < totalNum; i++ ){%>
+            <a  class="btn btn-xs <%= pageCode == i ? 'btn-primary' : 'btn-default'%>" href="/doubanlist/paging?pageCode=<%= i %>&limitNum=5"><%= i + 1%></a>
+            <% } %>
+            <a class="btn btn-xs <%= pageCode == totalNum - 1 ? 'btn-primary' : 'btn-default'%>" href="/doubanlist/paging?pageCode=<%= totalNum - 1%>&limitNum=5">尾页</a>
+
+                <!---------------显示总数-------------->
+              <a class="btn btn-xs btn-default" href="/doubanlist/paging?pageCode=0&limitNum=<%= len %>">显示全部数据</a>
+
+              <h4>
+                序列排序
+            <!---------票房升序降序---------->
+              <a class="btn btn-xs btn-default" href="/doubanlist/sortdata?flag=collect_count&type=1">票升序</a>
+              <a class="btn btn-xs btn-default" href="/doubanlist/sortdata?flag=collect_count&type=-1">票降序</a>
+
+                <!-----------年升序降序------------->
+              <a class="btn btn-xs btn-default" href="/doubanlist/sortdata?flag=year&type=1">年升序</a>
+              <a class="btn btn-xs btn-default" href="/doubanlist/sortdata?flag=year&type=-1">年降序</a>
+
+                <!------------筛选数据区间--------------->
+                <span style="margin-left:100px;font-size:14px;">票房区间筛选</span>
+                <input type="number" id="minB"/>-<input type="number" id="maxB"/>
+                <button class="btn btn-xs btn-default" onclick = "searchArea()">确定</button>
+              </h4>
+
+          </h3>
+
+          <div class="box-tools">
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" name="table_search" id="title" class="form-control pull-right" placeholder="以电影名称进行查询">
+
+              <div class="input-group-btn">
+                <button type="button" class="btn btn-default" onclick="search()"><i class="fa fa-search"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body table-responsive no-padding">
+          <table class="table table-hover">
+            <tr>
+              <th>序号</th>
+              <th>电影名称</th>
+              <th>上映时间</th>
+              <th>宣传图</th>
+              <th >票房</th>
+              <th>操作</th>
+            </tr>
+
+            <!-----新增数据排版------>
+              <%  if(result.length == 0) { %>
+            <tr>
+              <td>暂无数据</td>
+            </tr>
+              <%  }else { %>
+              <%  for(var i = 0; i < result.length; i++) {  %>
+            <tr>
+              <td> <%=  i+1 %></td>
+              <td><%= result[i].title  %></td>
+              <td><%= result[i].year  %></td>
+              <td><img src = "<%= result[i].images.small  %>" style="width: 80px" /></td>
+              <td><%= result[i].collect_count  %></td>
+              <td>
+                <button class="btn btn-xs btn-primary" onclick="updateMovie('<%= result[i].id  %>')">修改</button>
+                <button class="btn btn-xs btn-danger" onclick="deleteMovie('<%= result[i].id  %>')">删除</button>
+              </td>
+            </tr>
+              <% } %>
+              <%  }%>
+          </table>
+        </div>
+
+        <!-- /.box-body -->
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Main Footer -->
+  <% include footer.ejs %>
+</div>
+   
+  </body>
+  <script src="/javascripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/bootstrap/dist/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/javascripts/app.min.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  function deleteMovie(id){
+      window.location.href = "/movielist/deleteMovie?id="+id;
+  }
+  function updateMovie(id) {
+      window.location.href = "/movielist/updateMovie?id="+id;
+  }
+  function addMovie(len){
+      window.location.href = "/movielist/addMovie?len="+len;
+  }
+
+    function searchArea() {
+        var minVal = $("#minB").val();
+        var maxVal = $("#maxB").val();
+
+        window.location.href = "/doubanlist/findarea?flag=collect_count&min="+ minVal + "&max=" + maxVal;
+    }
+
+    function search(){
+        var name = $("#title").val();
+        window.location.href = "/doubanlist/search?flag=title&title=" + name;
+    }
+</script>
+</html>
